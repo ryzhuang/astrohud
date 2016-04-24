@@ -36,6 +36,8 @@ import android.widget.TextView;
 
 import com.google.vrtoolkit.cardboard.*;
 
+import org.w3c.dom.Text;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -52,12 +54,15 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
 
     private static final String TAG = "HeadsUpDisplayActivity";
     private static final int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
+    private BluetoothHelper mBluetoothHelper;
     private Camera camera;
     private ProgressBar mProgressBarLeft;
     private ProgressBar mProgressBarRight;
     private Handler mHandler;
     private TextView mCompassAzimuthLeft;
     private TextView mCompassAzimuthRight;
+    private TextView mRadiationRight;
+    private TextView mRadiationLeft;
     private SensorManager mSensorManager;
     private Sensor mCompass;
     private int mOxygenLevel;
@@ -66,13 +71,13 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
                     "attribute vec2 inputTextureCoordinate;" +
                     "varying vec2 textureCoordinate;" +
                     "void main()" +
-                    "{"+
-                    "gl_Position = position;"+
+                    "{" +
+                    "gl_Position = position;" +
                     "textureCoordinate = inputTextureCoordinate;" +
                     "}";
 
     private final String fragmentShaderCode =
-            "#extension GL_OES_EGL_image_external : require\n"+
+            "#extension GL_OES_EGL_image_external : require\n" +
                     "precision mediump float;" +
                     "varying vec2 textureCoordinate;                            \n" +
                     "uniform samplerExternalOES s_texture;               \n" +
@@ -112,11 +117,9 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
     };
 
 
-
-
     //, 1, 4, 3, 4, 5, 3
 //    private short drawOrder[] =  {0, 1, 2, 1, 3, 2 };//, 4, 5, 0, 5, 0, 1 }; // order to draw vertices
-    private short drawOrder[] =  {0, 2, 1, 1, 2, 3 }; // order to draw vertices
+    private short drawOrder[] = {0, 2, 1, 1, 2, 3}; // order to draw vertices
     private short drawOrder2[] = {2, 0, 3, 3, 0, 1}; // order to draw vertices
 
     static float textureVertices[] = {
@@ -143,8 +146,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
     private float[] mView;
     private float[] mCamera;
 
-    public void startCamera(int texture)
-    {
+    public void startCamera(int texture) {
 //        surface = (SurfaceTexture) findViewById(R.id.);
         surface = new SurfaceTexture(texture);
         surface.setOnFrameAvailableListener(this);
@@ -155,27 +157,23 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
         }
         camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
 
-        try
-        {
+        try {
             Camera.Parameters parameters = camera.getParameters();
             parameters.getSupportedPreviewSizes();
             camera.setPreviewTexture(surface);
             camera.startPreview();
-        }
-        catch (IOException ioe)
-        {
-            Log.w("HeadsUpDisplayActivity","CAM LAUNCH FAILED");
+        } catch (IOException ioe) {
+            Log.w("HeadsUpDisplayActivity", "CAM LAUNCH FAILED");
         }
     }
 
-    static private int createTexture()
-    {
+    static private int createTexture() {
         int[] texture = new int[1];
 
-        GLES20.glGenTextures(1,texture, 0);
+        GLES20.glGenTextures(1, texture, 0);
         GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture[0]);
         GLES20.glTexParameterf(GL_TEXTURE_EXTERNAL_OES,
-                GL10.GL_TEXTURE_MIN_FILTER,GL10.GL_LINEAR);
+                GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
         GLES20.glTexParameterf(GL_TEXTURE_EXTERNAL_OES,
                 GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
         GLES20.glTexParameteri(GL_TEXTURE_EXTERNAL_OES,
@@ -211,6 +209,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
 
     /**
      * Checks if we've had an error inside of OpenGL ES, and if so what that error is.
+     *
      * @param func
      */
     private static void checkGLError(String func) {
@@ -229,6 +228,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
     /**
      * Sets the view to our CardboardView and initializes the transformation matrices we will use
      * to render our scene.
+     *
      * @param savedInstanceState
      */
     @Override
@@ -243,7 +243,12 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
         mCompassAzimuthRight = (TextView) findViewById(R.id.hud_layout_container_compass_azimuth_right);
         mOxygenLevel = 100;
 
-        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        mRadiationRight = (TextView) findViewById(R.id.hud_layout_container_radiation_title_right);
+        mRadiationLeft = (TextView) findViewById(R.id.hud_layout_container_radiation_title_left);
+        mBluetoothHelper = new BluetoothHelper();
+        mBluetoothHelper.connectDevice();
+
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mCompass = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
         cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
@@ -277,6 +282,11 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
             try {
                 mProgressBarLeft.setProgress(mOxygenLevel);
                 mProgressBarRight.setProgress(mOxygenLevel);
+                final String input = mBluetoothHelper.getInput();
+                mRadiationRight.setText(input);
+                mRadiationLeft.setText(input);
+
+                Log.d(TAG, "run: " + input);
             } finally {
 
                 if (mOxygenLevel <= 1) {
@@ -292,6 +302,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
     private void startRepeatingTask() {
         mStatusChecker.run();
     }
+
     @Override
     public void onRendererShutdown() {
         Log.i(TAG, "onRendererShutdown");
@@ -305,6 +316,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
     /**
      * Creates the buffers we use to store information about the 3D world. OpenGL doesn't use Java
      * arrays, but rather needs data in a format it can understand. Hence we use ByteBuffers.
+     *
      * @param config The EGL configuration used when creating the surface.
      */
     @Override
@@ -432,6 +444,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
 
     /**
      * Prepares OpenGL ES before we draw a frame.
+     *
      * @param headTransform The head transformation in the new frame.
      */
     @Override
@@ -470,6 +483,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
     /**
      * Draws a frame for an eye. The transformation for that eye (from the camera) is passed in as
      * a parameter.
+     *
      * @param transform The transformations to apply to render this eye.
      */
     @Override
@@ -482,20 +496,18 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
         GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
 
 
-
         mPositionHandle = GLES20.glGetAttribLocation(mProgram, "position");
         GLES20.glEnableVertexAttribArray(mPositionHandle);
         GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT,
-                false,vertexStride, vertexBuffer);
+                false, vertexStride, vertexBuffer);
 
 
         mTextureCoordHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
         GLES20.glEnableVertexAttribArray(mTextureCoordHandle);
         GLES20.glVertexAttribPointer(mTextureCoordHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT,
-                false,vertexStride, textureVerticesBuffer);
+                false, vertexStride, textureVerticesBuffer);
 
         mColorHandle = GLES20.glGetAttribLocation(mProgram, "s_texture");
-
 
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.length,
@@ -603,6 +615,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
 //        checkGLError("drawing floor");
 //    }
 //
+
     /**
      * Increment the score, hide the object, and give feedback if the user pulls the magnet while
      * looking at the object. Otherwise, remind the user what to do.
@@ -634,6 +647,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
             mCompassAzimuthRight.setText(" < " + String.format("%03d", Math.round(azimuth)) + "   ");
         }
     }
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 

@@ -38,6 +38,7 @@
         android:progressDrawable="@drawable/blue_progress" />
 
     <LinearLayout
+        android:id="@+id/hud_layout_container_compass_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -61,6 +62,22 @@
             android:layout_below="@+id/hud_layout_container_oxygen_right"
             android:paddingRight="@dimen/hud_layout_container_elevation_small"
             android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/hud_layout_container_compass_right"
+        android:orientation="horizontal"
+        android:layout_marginLeft="15dp"
+        android:layout_marginBottom="10dp">
+        <TextView
+            android:id="@+id/hud_layout_container_radiation_title_right"
+            style="@style/SubHeaderTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/hud_layout_container_elevation_medium">
+
     </LinearLayout>
 
 </RelativeLayout>
