@@ -16,24 +16,22 @@
 
 package com.example.raymo.astrohud;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.hardware.Camera;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.util.Log;
 import com.google.vrtoolkit.cardboard.*;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -42,9 +40,9 @@ import java.nio.ShortBuffer;
 /**
  * A Cardboard sample application.
  */
-public class MainActivity extends CardboardActivity implements CardboardView.StereoRenderer, OnFrameAvailableListener {
+public class HeadsUpDisplayActivity extends CardboardActivity implements CardboardView.StereoRenderer, OnFrameAvailableListener {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "HeadsUpDisplayActivity";
     private static final int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
     private Camera camera;
 
@@ -135,6 +133,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
     public void startCamera(int texture)
     {
+//        surface = (SurfaceTexture) findViewById(R.id.);
         surface = new SurfaceTexture(texture);
         surface.setOnFrameAvailableListener(this);
 
@@ -153,7 +152,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         }
         catch (IOException ioe)
         {
-            Log.w("MainActivity","CAM LAUNCH FAILED");
+            Log.w("HeadsUpDisplayActivity","CAM LAUNCH FAILED");
         }
     }
 
@@ -210,6 +209,11 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         }
     }
 
+    public static void startActivity(final Activity activity) {
+        final Intent intent = new Intent(activity, HeadsUpDisplayActivity.class);
+        activity.startActivity(intent);
+    }
+
     /**
      * Sets the view to our CardboardView and initializes the transformation matrices we will use
      * to render our scene.
@@ -234,8 +238,8 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 //        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 //
 //
-        mOverlayView = (CardboardOverlayView) findViewById(R.id.overlay);
-        mOverlayView.show3DToast("Pull the magnet when you find an object.");
+//        mOverlayView = (CardboardOverlayView) findViewById(R.id.overlay);
+//        mOverlayView.show3DText("Oxygen Levels");
     }
 
     @Override
@@ -559,10 +563,10 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 //
 //        if (isLookingAtObject()) {
 //            mScore++;
-//            mOverlayView.show3DToast("Found it! Look around for another one.\nScore = " + mScore);
+//            mOverlayView.show3DText("Found it! Look around for another one.\nScore = " + mScore);
 //            hideObject();
 //        } else {
-//            mOverlayView.show3DToast("Look around to find the object!");
+//            mOverlayView.show3DText("Look around to find the object!");
 //        }
 //        // Always give user feedback
 //        mVibrator.vibrate(50);

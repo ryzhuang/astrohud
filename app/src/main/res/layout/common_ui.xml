@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ui_layout"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
-
 
     <com.google.vrtoolkit.cardboard.CardboardView
         android:id="@+id/cardboard_view"
@@ -12,6 +11,19 @@
         android:layout_height="fill_parent"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="fill_parent"
+        android:layout_width="fill_parent">
+        <LinearLayout android:layout_weight="1" android:layout_height="fill_parent" android:layout_width="fill_parent">
+            <include layout="@layout/hud_layout_container_left"/>
+        </LinearLayout>
+        <LinearLayout android:layout_weight="1" android:layout_height="fill_parent" android:layout_width="fill_parent">
+            <include layout="@layout/hud_layout_container_right"/>
+        </LinearLayout>
+    </LinearLayout>
+
 
     <com.example.raymo.astrohud.CardboardOverlayView
         android:id="@+id/overlay"

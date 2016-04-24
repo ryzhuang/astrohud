@@ -7,17 +7,13 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.raymo.astrohud.MainActivity">
+    tools:context=".HeadsUpDisplayActivity">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center">
-        <Button
-            android:id="@+id/activity_main_start_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_main_start_button_text"/>
-    </LinearLayout>
+    <com.google.vrtoolkit.cardboard.CardboardView
+        android:id="@+id/cardboard_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true" />\
 
 </RelativeLayout>

@@ -45,7 +45,7 @@ public class CardboardOverlayView extends LinearLayout {
 
         LayoutParams params = new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f);
-        params.setMargins(0, 0, 0, 0);
+        params.setMargins(0, 0, 0, 100);
 
         mLeftView = new CardboardOverlayEyeView(context, attrs);
         mLeftView.setLayoutParams(params);
@@ -64,16 +64,16 @@ public class CardboardOverlayView extends LinearLayout {
         mTextFadeAnimation.setDuration(5000);
     }
 
-    public void show3DToast(String message) {
+    public void show3DText(String message) {
         setText(message);
         setTextAlpha(1f);
-        mTextFadeAnimation.setAnimationListener(new EndAnimationListener() {
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                setTextAlpha(0f);
-            }
-        });
-        startAnimation(mTextFadeAnimation);
+//        mTextFadeAnimation.setAnimationListener(new EndAnimationListener() {
+//            @Override
+//            public void onAnimationEnd(Animation animation) {
+//                setTextAlpha(0f);
+//            }
+//        });
+//        startAnimation(mTextFadeAnimation);
     }
 
     private abstract class EndAnimationListener implements Animation.AnimationListener {

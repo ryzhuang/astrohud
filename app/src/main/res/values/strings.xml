@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">astrohud</string>
+    <string name="activity_main_start_button_text">START</string>
 </resources>
