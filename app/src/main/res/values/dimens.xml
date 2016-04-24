@@ -5,5 +5,5 @@
     <dimen name="hud_layout_container_elevation_small">0dp</dimen>
     <dimen name="hud_layout_container_elevation_medium">4dp</dimen>
     <dimen name="hud_layout_container_elevation_large">8dp</dimen>
-    <dimen name="layout_container_margin">18dp</dimen>
+    <dimen name="layout_container_margin">40dp</dimen>
 </resources>

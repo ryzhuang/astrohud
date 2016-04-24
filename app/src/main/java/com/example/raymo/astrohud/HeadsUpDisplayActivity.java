@@ -284,7 +284,7 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
                 } else {
                     mOxygenLevel -= 1;
                 }
-                mHandler.postDelayed(mStatusChecker, 500);
+                mHandler.postDelayed(mStatusChecker, 1000);
             }
         }
     };
