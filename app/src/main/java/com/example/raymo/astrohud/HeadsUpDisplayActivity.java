@@ -22,10 +22,18 @@ import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
 import com.google.vrtoolkit.cardboard.*;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -40,12 +48,19 @@ import java.nio.ShortBuffer;
 /**
  * A Cardboard sample application.
  */
-public class HeadsUpDisplayActivity extends CardboardActivity implements CardboardView.StereoRenderer, OnFrameAvailableListener {
+public class HeadsUpDisplayActivity extends CardboardActivity implements CardboardView.StereoRenderer, OnFrameAvailableListener, SensorEventListener {
 
     private static final String TAG = "HeadsUpDisplayActivity";
     private static final int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
     private Camera camera;
-
+    private ProgressBar mProgressBarLeft;
+    private ProgressBar mProgressBarRight;
+    private Handler mHandler;
+    private TextView mCompassAzimuthLeft;
+    private TextView mCompassAzimuthRight;
+    private SensorManager mSensorManager;
+    private Sensor mCompass;
+    private int mOxygenLevel;
     private final String vertexShaderCode =
             "attribute vec4 position;" +
                     "attribute vec2 inputTextureCoordinate;" +
@@ -121,9 +136,6 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
     private ByteBuffer indexBuffer;    // Buffer for index-array
 
     private int texture;
-
-
-    private CardboardOverlayView mOverlayView;
 
 
     private CardboardView cardboardView;
@@ -224,6 +236,16 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.common_ui);
+
+        mProgressBarLeft = (ProgressBar) findViewById(R.id.hud_layout_container_progress_left);
+        mProgressBarRight = (ProgressBar) findViewById(R.id.hud_layout_container_progress_right);
+        mCompassAzimuthLeft = (TextView) findViewById(R.id.hud_layout_container_compass_azimuth_left);
+        mCompassAzimuthRight = (TextView) findViewById(R.id.hud_layout_container_compass_azimuth_right);
+        mOxygenLevel = 100;
+
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        mCompass = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+
         cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
         cardboardView.setRenderer(this);
         setCardboardView(cardboardView);
@@ -231,17 +253,45 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
 //        mModelCube = new float[16];
         mCamera = new float[16];
         mView = new float[16];
-//        mModelViewProjection = new float[16];
-//        mModelView = new float[16];
-//        mModelFloor = new float[16];
-//        mHeadView = new float[16];
-//        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-//
-//
-//        mOverlayView = (CardboardOverlayView) findViewById(R.id.overlay);
-//        mOverlayView.show3DText("Oxygen Levels");
+
+        mHandler = new Handler();
+        startRepeatingTask();
     }
 
+    @Override
+    protected void onPause() {
+        // Unregister the listener on the onPause() event to preserve battery life;
+        super.onPause();
+        mSensorManager.unregisterListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(this, mCompass, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    Runnable mStatusChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                mProgressBarLeft.setProgress(mOxygenLevel);
+                mProgressBarRight.setProgress(mOxygenLevel);
+            } finally {
+
+                if (mOxygenLevel <= 1) {
+                    mOxygenLevel = 1;
+                } else {
+                    mOxygenLevel -= 1;
+                }
+                mHandler.postDelayed(mStatusChecker, 500);
+            }
+        }
+    };
+
+    private void startRepeatingTask() {
+        mStatusChecker.run();
+    }
     @Override
     public void onRendererShutdown() {
         Log.i(TAG, "onRendererShutdown");
@@ -570,6 +620,23 @@ public class HeadsUpDisplayActivity extends CardboardActivity implements Cardboa
 //        }
 //        // Always give user feedback
 //        mVibrator.vibrate(50);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float azimuth = Math.round(event.values[0]);
+        if (azimuth >= 180) {
+            azimuth = 360 - azimuth;
+            mCompassAzimuthLeft.setText("   " + String.format("%03d", Math.round(azimuth)) + " > ");
+            mCompassAzimuthRight.setText("   " + String.format("%03d", Math.round(azimuth)) + " > ");
+        } else {
+            mCompassAzimuthLeft.setText(" < " + String.format("%03d", Math.round(azimuth)) + "   ");
+            mCompassAzimuthRight.setText(" < " + String.format("%03d", Math.round(azimuth)) + "   ");
+        }
+    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 
 

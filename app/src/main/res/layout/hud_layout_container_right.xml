@@ -1,13 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginLeft="@dimen/layout_container_margin"
+    android:layout_marginRight="@dimen/layout_container_margin"
+    android:orientation="vertical">
 
     <TextView
+        android:id="@+id/hud_layout_container_title_right"
+        style="@style/HeaderTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="@dimen/hud_layout_container_elevation_small"
-        android:layout_centerInParent="true"
-        android:text="AWDAWDAWD" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:paddingRight="@dimen/hud_layout_container_elevation_large"
+        android:text="@string/hud_layout_container_title" />
+
+    <TextView
+        android:id="@+id/hud_layout_container_oxygen_right"
+        style="@style/SubHeaderTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/hud_layout_container_title_right"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:paddingRight="@dimen/hud_layout_container_elevation_medium"
+        android:text="@string/hud_layout_container_oxygen_level" />
+
+    <ProgressBar
+        android:id="@+id/hud_layout_container_progress_right"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/hud_layout_container_title_right"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_toRightOf="@id/hud_layout_container_oxygen_right"
+        android:paddingRight="@dimen/hud_layout_container_elevation_small"
+        android:progressDrawable="@drawable/blue_progress" />
+
+    <TextView
+        android:id="@+id/hud_layout_container_compass_title_right"
+        style="@style/SubHeaderTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/hud_layout_container_oxygen_right"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="240dp"
+        android:paddingRight="@dimen/hud_layout_container_elevation_medium"
+        android:text="SHIP BEACON" />
+
+    <TextView
+        android:id="@+id/hud_layout_container_compass_azimuth_right"
+        style="@style/SubHeaderTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/hud_layout_container_oxygen_right"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="240dp"
+        android:layout_toRightOf="@id/hud_layout_container_compass_title_right"
+        android:paddingRight="@dimen/hud_layout_container_elevation_small"
+        android:textStyle="bold" />
 </RelativeLayout>
